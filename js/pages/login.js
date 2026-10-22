@@ -71,7 +71,7 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
-    if (profile.role !== "admin" && profile.role !== "estudiante") {
+    if (profile.role !== "administrador" && profile.role !== "estudiante") {
       console.info("[SSAP login] Validación del perfil terminada: rol no reconocido.");
       outcome = "rol no reconocido";
       await denyAccess("El rol de tu cuenta no está reconocido. No se concedió acceso; contacta con soporte.");

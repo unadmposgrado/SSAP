@@ -54,6 +54,11 @@ export async function getAuthenticatedProfile() {
     return null;
   }
 
+  return getProfileByUserId(userId);
+}
+
+export async function getProfileByUserId(userId) {
+  const client = await getSupabaseClient();
   const { data, error } = await client
     .from("profiles")
     .select("id, full_name, role, account_status, program_id, created_at")

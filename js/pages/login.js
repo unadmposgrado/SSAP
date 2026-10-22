@@ -1,4 +1,5 @@
 import { getAuthErrorMessage, getAuthenticatedProfile, signIn, signOut } from "../auth.js";
+import { RECOGNIZED_ROLES, ROLE, ROLE_HOME } from "../roles.js";
 import { isSupabaseConfigured } from "../supabaseConfig.js";
 
 const form = document.querySelector("#login-form");
@@ -71,7 +72,7 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
-    if (profile.role !== "administrador" && profile.role !== "estudiante") {
+    if (!RECOGNIZED_ROLES.has(profile.role)) {
       console.info("[SSAP login] Validación del perfil terminada: rol no reconocido.");
       outcome = "rol no reconocido";
       await denyAccess("El rol de tu cuenta no está reconocido. No se concedió acceso; contacta con soporte.");
@@ -79,12 +80,23 @@ form.addEventListener("submit", async (event) => {
     }
 
     console.info("[SSAP login] Validación del perfil terminada: perfil válido.");
-    setStatus(
-      "Inicio de sesión correcto. Tu perfil está verificado; el dashboard correspondiente aún no está disponible.",
-      "success",
-    );
+    if (profile.role === ROLE.FACILITATOR || profile.role === ROLE.MONITOR) {
+      setStatus(
+        "Tu perfil está verificado, pero el espacio para este rol todavía no está disponible.",
+        "success",
+      );
+      outcome = "rol reconocido sin dashboard";
+      window.location.assign(`dashboard.html#${ROLE_HOME[profile.role]}`);
+      return;
+    }
+
+    setStatus("Inicio de sesión correcto. Abriendo tu espacio…", "success");
     outcome = "perfil válido";
-    form.reset();
+    window.location.assign(
+      profile.role === ROLE.ADMINISTRATOR
+        ? "dashboard.html#/admin/inicio"
+        : "dashboard.html#/dashboard/inicio",
+    );
   } catch (error) {
     console.info("[SSAP login] Error durante la operación.", {
       phase,

@@ -27,10 +27,10 @@ console.log("Respuesta:", await response.text());
 
 ## Decisiones pendientes
 
-- No se encontró documentación ni esquema de base de datos en el repositorio. El registro solo envía correo y contraseña a Supabase Auth; no se solicitan nombre, metadatos de perfil ni rol, y no se escriben contraseñas en tablas propias.
+- No se encontró documentación ni esquema de base de datos en el repositorio. El registro envía correo y contraseña a Supabase Auth y guarda el nombre como metadato `full_name`; no escribe el perfil ni el rol desde el navegador. Los roles existentes confirmados para `profiles.role` son `administrador`, `estudiante`, `facilitador` y `monitor`; las cuentas nuevas reciben el rol `estudiante` mediante la configuración existente de Supabase.
 - No se definió aquí una política de contraseña: la interfaz valida campos obligatorios y coincidencia; Supabase aplica los requisitos configurados en el proyecto.
-- No hay páginas de dashboard ni configuración de rutas en el repositorio. El inicio de sesión consulta el perfil autenticado en `public.profiles`; solo los perfiles con rol `admin` o `estudiante` y estado `activo` mantienen su sesión. Los perfiles ausentes, no activos, con un rol no reconocido o cuyo perfil no se pueda consultar no reciben acceso y se cierra la sesión.
-- Cuando se implementen los dashboards, conecta en `js/pages/login.js` el rol validado con las rutas reales de cada página. No se agregaron destinos provisionales ni se inventaron rutas. Esta navegación del cliente no sustituye las políticas RLS: la consulta requiere que las políticas existentes permitan leer el perfil propio y los datos privados deben seguir protegidos por Supabase.
+- El cliente consulta el perfil autenticado en `public.profiles`. Solo las cuentas con estado `activo` y rol reconocido acceden al espacio privado. Los perfiles ausentes, no activos, con rol no reconocido o cuyo perfil no se pueda consultar no reciben acceso. Los roles `facilitador` y `monitor` están reconocidos, pero sus dashboards aún no están implementados.
+- `dashboard.html` implementa navegación hash para el dashboard del estudiante (`#/dashboard/inicio`, `#/dashboard/avance`, `#/dashboard/portafolio`, `#/dashboard/retroalimentaciones`), el dashboard administrativo (`#/admin/inicio`, `#/admin/usuarios`) y el perfil común (`#/perfil`). El rol se consulta en `profiles.role`; el router no sustituye las políticas RLS. Las políticas existentes deben permitir consultar el perfil propio y los datos privados deben seguir protegidos por Supabase.
 - No se implementó recuperación de contraseña porque no se encontró una configuración ni un flujo de destino para probar.
 
 ## Prueba manual
@@ -39,7 +39,9 @@ console.log("Respuesta:", await response.text());
 2. Completa la URL y la clave pública en `js/supabaseConfig.js`.
 3. En `registro.html`, crea una cuenta con un correo que puedas consultar y una contraseña que cumpla las reglas configuradas en Supabase.
 4. Si está habilitada la confirmación, abre el correo recibido y confirma la cuenta. El registro solo indica sesión activa cuando Supabase devuelve una.
-5. En `login.html`, inicia sesión con esa cuenta y comprueba que su perfil activo de estudiante se consulta correctamente. Hasta que exista su dashboard, aparecerá el mensaje de que el perfil fue verificado y no se navegará a una ruta inexistente.
+5. En `login.html`, inicia sesión con esa cuenta y comprueba que su perfil activo de estudiante se consulta correctamente. La cuenta debe navegar a `dashboard.html#/dashboard/inicio`.
 6. Prueba también con una cuenta cuyo perfil falte, no esté activo o tenga otro rol, y confirma que no se concede acceso y que la sesión se cierra.
+7. Con una cuenta activa cuyo rol sea `administrador`, verifica `dashboard.html#/admin/inicio` y la vista pendiente de `#/admin/usuarios`. Comprueba que el estudiante no puede permanecer en rutas administrativas.
+8. Con cuentas activas de rol `facilitador` y `monitor`, comprueba que el acceso queda limitado a la vista que indica que su espacio está pendiente y que el perfil muestra el rol real.
 
 La autenticación no se considera probada hasta completar estos pasos contra el proyecto real de Supabase. No se modificaron tablas, políticas RLS, funciones ni triggers.

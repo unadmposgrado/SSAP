@@ -1,11 +1,14 @@
 import { getSupabaseClient } from "./supabaseClient.js";
 
-export async function registerAccount(email, password, fullName) {
+export async function registerAccount(email, password, fullName, emailRedirectTo = undefined) {
   const client = await getSupabaseClient();
   const { data, error } = await client.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: {
+      data: { full_name: fullName },
+      ...(emailRedirectTo ? { emailRedirectTo } : {}),
+    },
   });
   if (error) {
     throw error;

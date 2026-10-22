@@ -5,6 +5,7 @@ const form = document.querySelector("#register-form");
 const status = document.querySelector("#register-status");
 const submitButton = form.querySelector('button[type="submit"]');
 const buttonLabel = submitButton.querySelector("[data-button-label]");
+const emailRedirectTo = "https://unadmposgrado.github.io/SSAP/login.html";
 
 function setStatus(message, state = "") {
   status.textContent = message;
@@ -50,7 +51,7 @@ form.addEventListener("submit", async (event) => {
   setStatus("Procesando tu registro…");
 
   try {
-    const data = await registerAccount(email, password, fullName);
+    const data = await registerAccount(email, password, fullName, emailRedirectTo);
     if (data.session) {
       setStatus("Tu cuenta se creó y la sesión está activa. El destino de la aplicación está pendiente de definirse.", "success");
     } else {

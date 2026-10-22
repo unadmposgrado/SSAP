@@ -29,7 +29,8 @@ console.log("Respuesta:", await response.text());
 
 - No se encontró documentación ni esquema de base de datos en el repositorio. El registro solo envía correo y contraseña a Supabase Auth; no se solicitan nombre, metadatos de perfil ni rol, y no se escriben contraseñas en tablas propias.
 - No se definió aquí una política de contraseña: la interfaz valida campos obligatorios y coincidencia; Supabase aplica los requisitos configurados en el proyecto.
-- No hay una página de dashboard existente. Después del inicio de sesión se conserva la sesión y se informa el éxito, sin navegar a una ruta inventada.
+- No hay páginas de dashboard ni configuración de rutas en el repositorio. El inicio de sesión consulta el perfil autenticado en `public.profiles`; solo los perfiles con rol `admin` o `estudiante` y estado `activo` mantienen su sesión. Los perfiles ausentes, no activos, con un rol no reconocido o cuyo perfil no se pueda consultar no reciben acceso y se cierra la sesión.
+- Cuando se implementen los dashboards, conecta en `js/pages/login.js` el rol validado con las rutas reales de cada página. No se agregaron destinos provisionales ni se inventaron rutas. Esta navegación del cliente no sustituye las políticas RLS: la consulta requiere que las políticas existentes permitan leer el perfil propio y los datos privados deben seguir protegidos por Supabase.
 - No se implementó recuperación de contraseña porque no se encontró una configuración ni un flujo de destino para probar.
 
 ## Prueba manual
@@ -38,6 +39,7 @@ console.log("Respuesta:", await response.text());
 2. Completa la URL y la clave pública en `js/supabaseConfig.js`.
 3. En `registro.html`, crea una cuenta con un correo que puedas consultar y una contraseña que cumpla las reglas configuradas en Supabase.
 4. Si está habilitada la confirmación, abre el correo recibido y confirma la cuenta. El registro solo indica sesión activa cuando Supabase devuelve una.
-5. En `login.html`, inicia sesión con esa cuenta y comprueba que aparece el mensaje de sesión activa.
+5. En `login.html`, inicia sesión con esa cuenta y comprueba que su perfil activo de estudiante se consulta correctamente. Hasta que exista su dashboard, aparecerá el mensaje de que el perfil fue verificado y no se navegará a una ruta inexistente.
+6. Prueba también con una cuenta cuyo perfil falte, no esté activo o tenga otro rol, y confirma que no se concede acceso y que la sesión se cierra.
 
 La autenticación no se considera probada hasta completar estos pasos contra el proyecto real de Supabase. No se modificaron tablas, políticas RLS, funciones ni triggers.

@@ -39,6 +39,33 @@ export async function getAuthenticatedUser() {
   return data.user;
 }
 
+export async function getAuthenticatedProfile() {
+  const client = await getSupabaseClient();
+  const {
+    data: { session },
+    error: sessionError,
+  } = await client.auth.getSession();
+  if (sessionError) {
+    throw sessionError;
+  }
+
+  const userId = session?.user?.id;
+  if (!userId) {
+    return null;
+  }
+
+  const { data, error } = await client
+    .from("profiles")
+    .select("id, full_name, role, account_status, program_id, created_at")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function getSession() {
   const client = await getSupabaseClient();
   const { data, error } = await client.auth.getSession();

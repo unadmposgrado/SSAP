@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Inicia sesión en SSAP con tu correo electrónico y contraseña.">
+    <title>Iniciar sesión | SSAP</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="js/components/header.js"></script>
+    <script type="module" src="js/pages/login.js"></script>
+  </head>
+  <body>
+    <div id="site-header" data-page="login"></div>
+
+    <main class="form-page page-container">
+      <section class="form-card" aria-labelledby="login-title">
+        <div class="form-card__heading">
+          <p class="eyebrow">Te damos la bienvenida</p>
+          <h1 id="login-title">Inicia sesión</h1>
+          <p>Ingresa los datos asociados a tu cuenta.</p>
+        </div>
+
+        <form id="login-form" class="auth-form" novalidate>
+          <div class="form-field">
+            <label for="login-email">Correo electrónico</label>
+            <input id="login-email" name="email" type="email" autocomplete="email"
+              inputmode="email" required>
+          </div>
+          <div class="form-field">
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" name="password" type="password"
+              autocomplete="current-password" required>
+          </div>
+          <button class="button button--primary button--full" type="submit">
+            <span data-button-label>Inicia sesión</span>
+          </button>
+          <p id="login-status" class="form-status" aria-live="polite" aria-atomic="true"></p>
+        </form>
+
+        <p class="form-switch">
+          ¿Aún no tienes una cuenta? <a href="registro.html">Regístrate</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="page-container">
+        <p>SSAP · Sistema de Seguimiento Académico y Permanencia</p>
+      </div>
+    </footer>
+  </body>
+</html>

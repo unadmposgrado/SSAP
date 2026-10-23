@@ -69,16 +69,6 @@ export function renderStudentView(path, state) {
 }
 
 export function renderAdminView(path, state) {
-  if (path === "/admin/usuarios") {
-    return `
-      <h1>Usuarios</h1>
-      <p class="dashboard__lead">Administración de las cuentas del sistema.</p>
-      <section class="dashboard-card">
-        <p class="empty-state">Este módulo está pendiente de desarrollo.</p>
-      </section>
-    `;
-  }
-
   const name = state.profile.full_name || state.user.user_metadata?.full_name;
   const greeting = name ? `Bienvenido/a, ${escapeHTML(name)}.` : "Bienvenido/a.";
   return `

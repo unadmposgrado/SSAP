@@ -4,6 +4,7 @@ import {
   renderProfileView,
   renderStudentView,
 } from "./views/dashboardViews.js";
+import { mountAdminUsersView } from "./pages/adminUsers.js";
 import { RECOGNIZED_ROLES, ROLE, ROLE_HOME } from "./roles.js";
 
 const routes = {
@@ -165,7 +166,11 @@ function renderCurrentRoute(state) {
       setRoute(target, { replace: true });
     }
     renderNavigation(routes.administrator, target, "Navegación administrativa");
-    outlet.innerHTML = renderAdminView(target, state);
+    if (target === "/admin/usuarios") {
+      mountAdminUsersView(outlet, state.user.id);
+    } else {
+      outlet.innerHTML = renderAdminView(target, state);
+    }
     return;
   }
 

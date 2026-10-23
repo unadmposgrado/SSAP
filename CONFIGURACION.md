@@ -33,6 +33,14 @@ console.log("Respuesta:", await response.text());
 - `dashboard.html` implementa navegación hash para el dashboard del estudiante (`#/dashboard/inicio`, `#/dashboard/avance`, `#/dashboard/portafolio`, `#/dashboard/retroalimentaciones`), el dashboard administrativo (`#/admin/inicio`, `#/admin/usuarios`) y el perfil común (`#/perfil`). El rol se consulta en `profiles.role`; el router no sustituye las políticas RLS. Las políticas existentes deben permitir consultar el perfil propio y los datos privados deben seguir protegidos por Supabase.
 - No se implementó recuperación de contraseña porque no se encontró una configuración ni un flujo de destino para probar.
 
+### Dashboard de administración de usuarios
+
+La ruta `dashboard.html#/admin/usuarios` consulta `admin_list_ssap_users()` mediante el cliente de Supabase compartido. La función proporcionada valida `is_ssap_admin()` y entrega nombre, correo de `auth.users`, rol, estado, programa, fecha de registro y último acceso. La búsqueda, los filtros, el resumen y la paginación operan sobre la respuesta recibida; la interfaz muestra errores de permisos o conexión sin sustituirlos por datos ficticios.
+
+Los cambios de rol llaman a `change_ssap_user_role(p_user_id, p_new_role)`, que vuelve a comprobar la autorización en el backend. La interfaz no permite reducir el rol de una cuenta administradora: la función existente bloquea el último administrador en una operación individual, pero bloquea solo la fila objetivo y no serializa cambios concurrentes entre administradores. Antes de habilitar esas reducciones, se debe revisar y desplegar una protección transaccional contra esa condición de carrera.
+
+La edición de nombre y programa, los cambios de estado y la eliminación no están habilitados. Aunque se proporcionaron las funciones `suspend_ssap_user` y `reactivate_ssap_user`, no se revisaron las políticas RLS de todos los recursos protegidos; por ello no se puede confirmar que una suspensión impida todo acceso existente o que la reactivación sea coherente. Tampoco se proporcionó una operación de eliminación de Auth y perfil. Antes de habilitar estas operaciones, revisar las políticas RLS, permisos `EXECUTE`, claves foráneas y el manejo de sesiones en el backend. No se cambió SQL ni se expusieron credenciales administrativas.
+
 ## Prueba manual
 
 1. Sirve la carpeta con un servidor web local que soporte módulos ES; no abras las páginas como archivos `file://`.
@@ -41,7 +49,7 @@ console.log("Respuesta:", await response.text());
 4. Si está habilitada la confirmación, abre el correo recibido y confirma la cuenta. El registro solo indica sesión activa cuando Supabase devuelve una.
 5. En `login.html`, inicia sesión con esa cuenta y comprueba que su perfil activo de estudiante se consulta correctamente. La cuenta debe navegar a `dashboard.html#/dashboard/inicio`.
 6. Prueba también con una cuenta cuyo perfil falte, no esté activo o tenga otro rol, y confirma que no se concede acceso y que la sesión se cierra.
-7. Con una cuenta activa cuyo rol sea `administrador`, verifica `dashboard.html#/admin/inicio` y la vista pendiente de `#/admin/usuarios`. Comprueba que el estudiante no puede permanecer en rutas administrativas.
+7. Con una cuenta activa cuyo rol sea `administrador`, verifica `dashboard.html#/admin/inicio` y `#/admin/usuarios`. Confirma que el listado de la función `admin_list_ssap_users()` carga, que los filtros y la búsqueda trabajan sobre esa respuesta y que un cambio de rol autorizado se actualiza después de que `change_ssap_user_role()` tenga éxito. Comprueba que el estudiante no puede permanecer en rutas administrativas y que una consulta RPC no autorizada es rechazada por el backend.
 8. Con cuentas activas de rol `facilitador` y `monitor`, comprueba que el acceso queda limitado a la vista que indica que su espacio está pendiente y que el perfil muestra el rol real.
 
 La autenticación no se considera probada hasta completar estos pasos contra el proyecto real de Supabase. No se modificaron tablas, políticas RLS, funciones ni triggers.

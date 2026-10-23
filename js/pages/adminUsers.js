@@ -55,18 +55,24 @@ function formatDate(value) {
 function errorMessage(error, operation) {
   if (error?.code === "42501") {
     return operation === "list"
-      ? "El backend rechazó la consulta. Verifica que la sesión pertenezca a una cuenta administradora y que la función tenga permiso de ejecución."
-      : "El backend rechazó el cambio. Verifica que la sesión siga activa y tenga autorización administrativa.";
+      ? "Supabase rechazó la consulta por permisos. Verifica que el token de sesión pertenezca a un administrador activo y que `authenticated` tenga permiso EXECUTE sobre `admin_list_ssap_users()`."
+      : "Supabase rechazó el cambio por permisos. Verifica que el token de sesión pertenezca a un administrador activo y que `authenticated` tenga permiso EXECUTE sobre `change_ssap_user_role(uuid, text)`.";
   }
   if (error?.code === "PGRST202" || error?.code === "PGRST203") {
     return "La función administrativa no está disponible en la caché de API de Supabase. Verifica su despliegue y vuelve a intentarlo.";
   }
-  if (error instanceof TypeError) {
+  if (error?.code === "PGRST301" || error?.status === 401) {
+    return "Supabase no aceptó la sesión para esta operación. Vuelve a iniciar sesión y confirma que tu cuenta siga activa.";
+  }
+  if (
+    error instanceof TypeError
+    && /fetch|network|load failed/i.test(error.message)
+  ) {
     return "No fue posible conectar con Supabase. Revisa tu conexión e inténtalo de nuevo.";
   }
   return operation === "list"
-    ? "No se pudo cargar el listado. Revisa la conexión y los permisos del backend e inténtalo de nuevo."
-    : "No se pudo guardar el cambio. El perfil no se actualizará en pantalla; revisa los permisos del backend e inténtalo de nuevo.";
+    ? "No se pudo procesar la respuesta del listado. Inténtalo de nuevo; si el problema persiste, revisa el error técnico en la consola del navegador."
+    : "No se pudo guardar el cambio. El perfil no se actualizará en pantalla; inténtalo de nuevo y revisa el error técnico en la consola si persiste.";
 }
 
 function appendDetailRow(list, label, value) {
@@ -110,11 +116,11 @@ export function mountAdminUsersView(outlet, administratorId) {
   searchField.append(searchLabel, search);
 
   const roleField = createElement("div", "admin-filter");
-  const roleLabel = createElement("label", "", "Filtrar por rol");
+  const roleFilterLabel = createElement("label", "", "Filtrar por rol");
   const roleFilter = createElement("select", "admin-filter__input");
   roleFilter.id = "admin-user-role";
-  roleLabel.htmlFor = roleFilter.id;
-  roleField.append(roleLabel, roleFilter);
+  roleFilterLabel.htmlFor = roleFilter.id;
+  roleField.append(roleFilterLabel, roleFilter);
 
   const statusField = createElement("div", "admin-filter");
   const statusFilterLabel = createElement("label", "", "Filtrar por estado");
